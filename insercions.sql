@@ -15,26 +15,36 @@ insert into estacions(nom) values ("Tardor");
 insert into estacions(nom) values ("Hivern");
 
 -- Plantes
-insert into plantes(nom_popular, nom_llati, nom_estacio_floracio) values ("Gerani", "Pelargonium", "Primavera");
-insert into plantes(nom_popular, nom_llati, nom_estacio_floracio) values ("Begònia", "Begonia rex", "Estiu");
-insert into plantes(nom_popular, nom_llati, nom_estacio_floracio) values ("Camèlia", "Camellia", "Primavera");
-insert into plantes(nom_popular, nom_llati, nom_estacio_floracio) values ("Ciclamen", "Cyclamen", "Hivern");
-insert into plantes(nom_popular, nom_llati, nom_estacio_floracio) values ("Roser", "Rosa", "Primavera");
-insert into plantes(nom_popular, nom_llati, nom_estacio_floracio) values ("Falguera", "Polystichum", NULL);
-insert into plantes(nom_popular, nom_llati, nom_estacio_floracio) values ("Tulipa", "Tulipa", "Primavera");
-insert into plantes(nom_popular, nom_llati, nom_estacio_floracio) values ("Crisantem", "Chrysanthemum", "Estiu");
-insert into plantes(nom_popular, nom_llati, nom_estacio_floracio) values ("Potus", "Philodendron", NULL);
-insert into plantes(nom_popular, nom_llati, nom_estacio_floracio) values ("Cintes", "Chlorophytum", "Primavera");
-insert into plantes(nom_popular, nom_llati, nom_estacio_floracio) values ("Poinsetia", "Euphorbia", "Hivern");
-insert into plantes(nom_popular, nom_llati, nom_estacio_floracio) values ("Heura", "Hedera", NULL);
-insert into plantes(nom_popular, nom_llati, nom_estacio_floracio) values ("Ficus Benjamina ", "Ficus", NULL);
-insert into plantes(nom_popular, nom_llati, nom_estacio_floracio) values ("Croton", "Codiaeum", NULL);
+insert into plantes(nom_popular, nom_llati) values ("Gerani", "Pelargonium");
+insert into plantes(nom_popular, nom_llati) values ("Begònia", "Begonia rex");
+insert into plantes(nom_popular, nom_llati) values ("Camèlia", "Camellia");
+insert into plantes(nom_popular, nom_llati) values ("Ciclamen", "Cyclamen");
+insert into plantes(nom_popular, nom_llati) values ("Roser", "Rosa");
+insert into plantes(nom_popular, nom_llati) values ("Falguera", "Polystichum");
+insert into plantes(nom_popular, nom_llati) values ("Tulipa", "Tulipa");
+insert into plantes(nom_popular, nom_llati) values ("Crisantem", "Chrysanthemum");
+insert into plantes(nom_popular, nom_llati) values ("Potus", "Philodendron");
+insert into plantes(nom_popular, nom_llati) values ("Cintes", "Chlorophytum");
+insert into plantes(nom_popular, nom_llati) values ("Poinsetia", "Euphorbia");
+insert into plantes(nom_popular, nom_llati) values ("Heura", "Hedera");
+insert into plantes(nom_popular, nom_llati) values ("Ficus Benjamina ", "Ficus");
+insert into plantes(nom_popular, nom_llati) values ("Croton", "Codiaeum");
+
+-- Floració
+insert into floracio(nom_planta, nom_estacio) values ("Gerani", "Primavera");
+insert into floracio(nom_planta, nom_estacio) values ("Begònia", "Estiu");
+insert into floracio(nom_planta, nom_estacio) values ("Camèlia", "Primavera");
+insert into floracio(nom_planta, nom_estacio) values ("Ciclamen", "Hivern");
+insert into floracio(nom_planta, nom_estacio) values ("Roser", "Primavera");
+insert into floracio(nom_planta, nom_estacio) values ("Tulipa", "Primavera");
+insert into floracio(nom_planta, nom_estacio) values ("Crisantem", "Estiu");
+insert into floracio(nom_planta, nom_estacio) values ("Poinsetia", "Hivern");
 
 -- Plantes d'interior
-insert into plantes_interior(nom_planta, ubiacio_adient, temperatura_adient) values ("Potus", "Llum directa", 15.0);
-insert into plantes_interior(nom_planta, ubiacio_adient, temperatura_adient) values ("Poinsetia", "Llum indirecta", 18.0);
-insert into plantes_interior(nom_planta, ubiacio_adient, temperatura_adient) values ("Ficus Benjamina ", "Llum indirecta", 19.0);
-insert into plantes_interior(nom_planta, ubiacio_adient, temperatura_adient) values ("Croton", "No corrents", 17.0);
+insert into plantes_interior(nom_planta, ubicacio_adient, temperatura_adient) values ("Potus", "Llum directa", 15.0);
+insert into plantes_interior(nom_planta, ubicacio_adient, temperatura_adient) values ("Poinsetia", "Llum indirecta", 18.0);
+insert into plantes_interior(nom_planta, ubicacio_adient, temperatura_adient) values ("Ficus Benjamina ", "Llum indirecta", 19.0);
+insert into plantes_interior(nom_planta, ubicacio_adient, temperatura_adient) values ("Croton", "No corrents", 17.0);
 
 -- Plantes d'exterior
 insert into plantes_exterior(nom_planta, cicle_de_vida) values ("Gerani", "P");

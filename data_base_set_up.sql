@@ -16,7 +16,7 @@ CREATE TABLE adobs
     tipus CHAR(50),
     nom_firma_comercial CHAR(50) NOT NULL,
     CONSTRAINT pk_adobs PRIMARY KEY (nom) ,
-    CONSTRAINT fk_adobs FOREIGN KEY (nom_firma_comercial) REFERENCES firmes_comercials(nom) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT fk_adobs_to_firma_comercial FOREIGN KEY (nom_firma_comercial) REFERENCES firmes_comercials(nom) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
 CREATE TABLE estacions
@@ -28,17 +28,17 @@ CREATE TABLE estacions
 CREATE TABLE plantes
 (
     nom_popular CHAR(50),
-    nom_llati CHAR(50) UNIQUE NOT NULL,
-    CONSTRAINT pk_plantes PRIMARY KEY (nom_popular) ,
+    nom_llati CHAR(50) UNIQUE NOT NULL, /* Clau alternativa */
+    CONSTRAINT pk_plantes PRIMARY KEY (nom_popular)
 ) ENGINE = InnoDB;
 
-CREATE TABLE nom_estacio_floracio
+CREATE TABLE floracio
 (
     nom_planta CHAR(50),
     nom_estacio CHAR(50),
     CONSTRAINT pk_floracio PRIMARY KEY (nom_planta, nom_estacio),
-    CONSTRAINT fk_floracio_to_plantes (nom_planta) REFERENCES plantes(nom_popular),
-    CONSTRAINT fk_floracio_to_estacions (nom_estacio) REFERENCES estacions(nom)
+    CONSTRAINT fk_floracio_to_plantes FOREIGN KEY (nom_planta) REFERENCES plantes(nom_popular) ON DELETE CASCADE ON UPDATE CASCADE, 
+    CONSTRAINT fk_floracio_to_estacions FOREIGN KEY (nom_estacio) REFERENCES estacions(nom) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
 CREATE TABLE dosis_adobs
@@ -74,14 +74,17 @@ CREATE TABLE plantes_interior
     nom_planta CHAR(50),
     ubicacio_adient CHAR(50),
     temperatura_adient FLOAT(5,2),
-    CONSTRAINT pk_plantes_interior PRIMARY KEY (nom_planta) 
+    CONSTRAINT pk_plantes_interior PRIMARY KEY (nom_planta), 
+    CONSTRAINT fk_plantes_interior_to_plantes FOREIGN KEY (nom_planta) REFERENCES plantes(nom_popular) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
 CREATE TABLE plantes_exterior
 (
     nom_planta CHAR(50),
     cicle_de_vida CHAR(1),
-    CONSTRAINT pk_plantes_exterior PRIMARY KEY (nom_planta)
+    CONSTRAINT pk_plantes_exterior PRIMARY KEY (nom_planta),
+    CONSTRAINT fk_plantes_exterior_to_plantes FOREIGN KEY (nom_planta) REFERENCES plantes(nom_popular) ON DELETE CASCADE ON UPDATE CASCADE
+
 ) ENGINE = InnoDB;
 
 CREATE TABLE rec_plantes
@@ -89,7 +92,7 @@ CREATE TABLE rec_plantes
     nom_planta_interior CHAR(50),
     nom_estacio CHAR(50),
     quantitat_aigua FLOAT(5,2),
-    CONSTRAINT pk_rec_plantes PRIMARY KEY (nom_planta_interior, nom_estacio) ,
+    CONSTRAINT pk_rec_plantes PRIMARY KEY (nom_planta_interior, nom_estacio),
     CONSTRAINT fk_rec_plantes_to_plantes_interior FOREIGN KEY (nom_planta_interior) REFERENCES plantes_interior(nom_planta) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_rec_plantes_to_estacions FOREIGN KEY (nom_estacio) REFERENCES estacions(nom) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB;
@@ -104,12 +107,14 @@ CREATE TABLE origen_plantes
 (
     nom_planta_interior CHAR(50),
     nom_pais CHAR(50),
-    CONSTRAINT pk_origen_plantes PRIMARY KEY (nom_planta_interior, nom_pais)
+    CONSTRAINT pk_origen_plantes PRIMARY KEY (nom_planta_interior, nom_pais),
+    CONSTRAINT fk_origen_plantes_to_paisos FOREIGN KEY (nom_pais) REFERENCES paisos(nom) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
 CREATE TABLE exemplars_plantes
 (
     numero INT(2),
     nom_planta CHAR(50),
-    CONSTRAINT pk_exemplars_plantes PRIMARY KEY (numero, nom_planta)
+    CONSTRAINT pk_exemplars_plantes PRIMARY KEY (numero, nom_planta),
+    CONSTRAINT fk_exemplars_plantes_to_plantes FOREIGN KEY (nom_planta) REFERENCES plantes(nom_popular) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB;
