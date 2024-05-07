@@ -2,6 +2,7 @@
 DROP SCHEMA IF EXISTS PLANTS;
 CREATE SCHEMA PLANTS;
 USE PLANTS;
+-- USAR \W PARA HACER DISPLAY DE TODOS LOS WARNINGS
 
 -- DEFINICION DE TABLAS DE LA BASE DE DATOS
 CREATE TABLE firmes_comercials
@@ -30,8 +31,8 @@ CREATE TABLE plantes
     nom_popular CHAR(50),
     nom_llati CHAR(50) UNIQUE NOT NULL,
     nom_estacio_floracio CHAR(50),
-    CONSTRAINT pk_plantes PRIMARY KEY (nom_popular) ,
-    CONSTRAINT fk_estacions FOREIGN KEY (nom_estacio_floracio) REFERENCES estacions(nom) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT pk_plantes PRIMARY KEY (nom_popular),
+    CONSTRAINT fk_plantes_to_estacions FOREIGN KEY (nom_estacio_floracio) REFERENCES estacions(nom) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
 CREATE TABLE dosis_adobs
