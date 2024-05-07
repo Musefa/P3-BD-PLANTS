@@ -30,6 +30,24 @@ insert into plantes(nom_popular, nom_llati, nom_estacio_floracio) values ("Heura
 insert into plantes(nom_popular, nom_llati, nom_estacio_floracio) values ("Ficus Benjamina ", "Ficus", NULL);
 insert into plantes(nom_popular, nom_llati, nom_estacio_floracio) values ("Croton", "Codiaeum", NULL);
 
+-- Plantes d'interior
+insert into plantes_interior(nom_planta, ubiacio_adient, temperatura_adient) values ("Potus", "Llum directa", 15.0);
+insert into plantes_interior(nom_planta, ubiacio_adient, temperatura_adient) values ("Poinsetia", "Llum indirecta", 18.0);
+insert into plantes_interior(nom_planta, ubiacio_adient, temperatura_adient) values ("Ficus Benjamina ", "Llum indirecta", 19.0);
+insert into plantes_interior(nom_planta, ubiacio_adient, temperatura_adient) values ("Croton", "No corrents", 17.0);
+
+-- Plantes d'exterior
+insert into plantes_exterior(nom_planta, cicle_de_vida) values ("Gerani", "P");
+insert into plantes_exterior(nom_planta, cicle_de_vida) values ("Begònia", "P");
+insert into plantes_exterior(nom_planta, cicle_de_vida) values ("Camèlia", "P");
+insert into plantes_exterior(nom_planta, cicle_de_vida) values ("Ciclamen", "P");
+insert into plantes_exterior(nom_planta, cicle_de_vida) values ("Roser", "P");
+insert into plantes_exterior(nom_planta, cicle_de_vida) values ("Falguera", "P");
+insert into plantes_exterior(nom_planta, cicle_de_vida) values ("Tulipa", "T");
+insert into plantes_exterior(nom_planta, cicle_de_vida) values ("Crisantem", NULL);
+insert into plantes_exterior(nom_planta, cicle_de_vida) values ("Cintes", "P");
+insert into plantes_exterior(nom_planta, cicle_de_vida) values ("Heura", "P"); /* LES PLANTES D'INTERIOR TAMBÉ TENEN TIPUS DE PLANTA, ERROR */
+
 -- Exemplars plantes
 
 -- Firmes comercials
