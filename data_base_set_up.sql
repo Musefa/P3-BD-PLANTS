@@ -73,7 +73,7 @@ CREATE TABLE plantes_interior
 CREATE TABLE plantes_exterior
 (
     nom_planta CHAR(50),
-    cicle_de_vida SMALLINT,
+    cicle_de_vida CHAR(1),
     CONSTRAINT pk_plantes_exterior PRIMARY KEY (nom_planta)
 ) ENGINE = InnoDB;
 
