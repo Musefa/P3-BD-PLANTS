@@ -30,8 +30,8 @@ CREATE TABLE plantes
     nom_popular CHAR(50),
     nom_llati CHAR(50) UNIQUE NOT NULL,
     nom_estacio_floracio CHAR(50),
-    CONSTRAINT pk_plantes PRIMARY KEY (nom_popular) ,
-    CONSTRAINT fk_adobs FOREIGN KEY (nom_popular) REFERENCES estacions(nom) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT pk_plantes PRIMARY KEY (nom_popular),
+    CONSTRAINT fk_adobs FOREIGN KEY (nom_estacio_floracio) REFERENCES estacions(nom) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
 CREATE TABLE dosis_adobs
@@ -41,7 +41,7 @@ CREATE TABLE dosis_adobs
     nom_adob CHAR(20),
     quantitat_adob FLOAT(5,2),
     CONSTRAINT pk_dosis_adobs PRIMARY KEY (nom_planta, nom_estacio, nom_adob) ,
-    CONSTRAINT fk_dosis_adobs_to_plantes FOREIGN KEY (nom_planta) REFERENCES plantes(nom) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_dosis_adobs_to_plantes FOREIGN KEY (nom_planta) REFERENCES plantes(nom_popular) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_dosis_adobs_to_estacions FOREIGN KEY (nom_estacio) REFERENCES estacions(nom) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_dosis_adobs_to_adobs FOREIGN KEY (nom_adob) REFERENCES adobs(nom) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT quantitat_adob CHECK (quantitat_adob >= 20 AND quantitat_adob <= 1000) 
@@ -49,7 +49,7 @@ CREATE TABLE dosis_adobs
 
 CREATE TABLE metodes_reproduccio
 (
-    nom_popular CHAR(50),
+    nom CHAR(50),
     CONSTRAINT pk_metodes_reproduccio PRIMARY KEY (nom)
 ) ENGINE = InnoDB;
 
@@ -59,7 +59,7 @@ CREATE TABLE reproduccions (
     grau_exit CHAR(50),
     CONSTRAINT pk_reproduccions PRIMARY KEY (nom_planta, nom_metode),
     CONSTRAINT fk_reproduccions_to_plantes FOREIGN KEY (nom_planta) REFERENCES plantes(nom_popular) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT fk_reproduccions_to_metodes_reproduccio FOREIGN KEY (nom_metode) REFERENCES metodes_reproduccio(nom_popular) ON DELETE CASCADE ON UPDATE CASCADE 
+    CONSTRAINT fk_reproduccions_to_metodes_reproduccio FOREIGN KEY (nom_metode) REFERENCES metodes_reproduccio(nom) ON DELETE CASCADE ON UPDATE CASCADE 
 ) ENGINE = InnoDB;
 
 CREATE TABLE plantes_interior
