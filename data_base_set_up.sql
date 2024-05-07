@@ -2,51 +2,62 @@
 DROP SCHEMA IF EXISTS PLANTS;
 CREATE SCHEMA PLANTS;
 USE PLANTS;
+
 -- DEFINICION DE TABLAS DE LA BASE DE DATOS
-CREATE TABLE Plantes
+CREATE TABLE firmes_comercials
 (
-    nom_popular VARCHAR(50) PRIMARY KEY,
-    nom_llati VARCHAR(50) UNIQUE NOT NULL
+    nom CHAR(50),
+    PRIMARY KEY (nom)
 );
 
-CREATE TABLE Metodes_Reproduccio
+CREATE TABLE adobs
 (
-    nom_popular VARCHAR(50) PRIMARY KEY
+    nom CHAR(50),
+    tipus CHAR(50),
+    nom_firma_comercial CHAR(50) NOT NULL,
+    PRIMARY KEY (nom),
+    FOREIGN KEY (nom_firma_comercial) REFERENCES firmes_comercials(nom) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE Reproduccions
+CREATE TABLE estacions
 (
-    nom_planta VARCHAR(50) NOT NULL,
-    nom_metode VARCHAR(50) NOT NULL,
+    nom CHAR(50),
+    PRIMARY KEY (nom)
+);
+
+CREATE TABLE plantes
+(
+    nom_popular CHAR(50),
+    nom_llati CHAR(50) UNIQUE NOT NULL,
+    nom_estacio_floracio CHAR(50),
+    PRIMARY KEY (nom_popular),
+    FOREIGN KEY (nom_popular) REFERENCES estacions(nom) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE dosis_adobs
+(
+    nom_planta CHAR(20),
+    nom_estacio CHAR(20),
+    nom_adob CHAR(20),
+    quantitat_adob FLOAT(5,2),
+    PRIMARY KEY (nom_planta, nom_estacio, nom_adob),
+    FOREIGN KEY (nom_planta) REFERENCES plantes(nom) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (nom_estacio) REFERENCES estacions(nom) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (nom_adob) REFERENCES adobs(nom) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT quantitat_adob CHECK (quantitat_adob >= 20 AND quantitat_adob <= 1000) NOT DEFERRABLE
+);
+
+CREATE TABLE metodes_reproduccio
+(
+    nom_popular CHAR(50),
+    PRIMARY KEY
+);
+
+CREATE TABLE reproduccions (
+    nom_planta CHAR(50),
+    nom_metode CHAR(50),
     grau_exit SMALLINT,
+    PRIMARY KEY (nom_planta, nom_metode),
     FOREIGN KEY (nom_planta) REFERENCES Plantes(nom_popular),
     FOREIGN KEY (nom_metode) REFERENCES Metodes_Reproduccio(nom_popular)
 );
-
--- INSERCIONES DEFAULT
-INSERT INTO Plantes (nom_popular, nom_llati) VALUES ('default_nom_popular', 'default_nom_llati');
-INSERT INTO Metodes_Reproduccio (nom_popular) VALUES ('default_metode_reproduccio');
-INSERT INTO Reproduccions (nom_planta, nom_metode, grau_exit) VALUES ('default_nom_popular', 'default_metode_reproduccio', 0);
-
--- DEFINICION DE TRIGGERS
-DELIMITER //
-
-CREATE TRIGGER after_plantes_insert
-AFTER INSERT ON Plantes
-FOR EACH ROW
-BEGIN
-    INSERT INTO Reproduccions (nom_planta, nom_metode, grau_exit)
-    VALUES (NEW.nom_popular, 'default_metode_reproduccio', NULL);
-END//
-
-CREATE TRIGGER after_metodes_reproduccio_insert
-AFTER INSERT ON Metodes_Reproduccio
-FOR EACH ROW
-BEGIN
-    INSERT INTO Reproduccions (nom_planta, nom_metode, grau_exit)
-    VALUES ('default_nom_popular', NEW.nom_popular, NULL);
-END//
-
-DELIMITER ;
-
-
