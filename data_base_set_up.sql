@@ -29,9 +29,16 @@ CREATE TABLE plantes
 (
     nom_popular CHAR(50),
     nom_llati CHAR(50) UNIQUE NOT NULL,
-    nom_estacio_floracio CHAR(50),
     CONSTRAINT pk_plantes PRIMARY KEY (nom_popular) ,
-    CONSTRAINT fk_estacions FOREIGN KEY (nom_estacio_floracio) REFERENCES estacions(nom) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE = InnoDB;
+
+CREATE TABLE nom_estacio_floracio
+(
+    nom_planta CHAR(50),
+    nom_estacio CHAR(50),
+    CONSTRAINT pk_floracio PRIMARY KEY (nom_planta, nom_estacio),
+    CONSTRAINT fk_floracio_to_plantes (nom_planta) REFERENCES plantes(nom_popular),
+    CONSTRAINT fk_floracio_to_estacions (nom_estacio) REFERENCES estacions(nom)
 ) ENGINE = InnoDB;
 
 CREATE TABLE dosis_adobs
