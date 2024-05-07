@@ -15,7 +15,7 @@ CREATE TABLE adobs
     nom CHAR(50),
     tipus CHAR(50),
     nom_firma_comercial CHAR(50) NOT NULL,
-    PRIMARY KEY (nom),
+    CONSTRAINT pk_adobs PRIMARY KEY (nom) NOT DEFERRABLE,
     FOREIGN KEY (nom_firma_comercial) REFERENCES firmes_comercials(nom) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
