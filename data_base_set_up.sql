@@ -7,7 +7,7 @@ USE PLANTS;
 CREATE TABLE firmes_comercials
 (
     nom CHAR(50),
-    PRIMARY KEY (nom)
+    CONSTRAINT pk_firmes_comercials PRIMARY KEY (nom)
 ) ENGINE = InnoDB;
 
 CREATE TABLE adobs
