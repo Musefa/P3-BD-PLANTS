@@ -43,7 +43,7 @@ insert into floracio(nom_planta, nom_estacio) values ("Poinsetia", "Hivern");
 -- Plantes d'interior
 insert into plantes_interior(nom_planta, ubicacio_adient, temperatura_adient) values ("Potus", "Llum directa", 15.0);
 insert into plantes_interior(nom_planta, ubicacio_adient, temperatura_adient) values ("Poinsetia", "Llum indirecta", 18.0);
-insert into plantes_interior(nom_planta, ubicacio_adient, temperatura_adient) values ("Ficus Benjamina ", "Llum indirecta", 19.0);
+insert into plantes_interior(nom_planta, ubicacio_adient, temperatura_adient) values ("Ficus Benjamina", "Llum indirecta", 19.0);
 insert into plantes_interior(nom_planta, ubicacio_adient, temperatura_adient) values ("Croton", "No corrents", 17.0);
 
 -- Plantes d'exterior
@@ -99,7 +99,7 @@ insert into dosis_adobs(nom_planta, nom_estacio, nom_adob, quantitat_adob) value
 insert into dosis_adobs(nom_planta, nom_estacio, nom_adob, quantitat_adob) values ("Croton", "Primavera", "Casadob", 40.0);
 insert into dosis_adobs(nom_planta, nom_estacio, nom_adob, quantitat_adob) values ("Croton", "Estiu", "Casadob", 60.0);
 insert into dosis_adobs(nom_planta, nom_estacio, nom_adob, quantitat_adob) values ("Gerani", "Estiu", "Sanexplant", 40.0);
-insert into dosis_adobs(nom_planta, nom_estacio, nom_adob, quantitat_adob) values ("Ficus benjamina", "Primavera", "Casadob", 50.0);
+insert into dosis_adobs(nom_planta, nom_estacio, nom_adob, quantitat_adob) values ("Ficus Benjamina", "Primavera", "Casadob", 50.0);
 
 -- Reproduccions
 insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Gerani", "Esqueix", "Alt");
