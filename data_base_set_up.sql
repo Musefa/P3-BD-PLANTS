@@ -113,7 +113,7 @@ CREATE TABLE origen_plantes
 
 CREATE TABLE exemplars_plantes
 (
-    numero INT(2),
+    numero INT(2) auto_increment,
     nom_planta CHAR(50),
     CONSTRAINT pk_exemplars_plantes PRIMARY KEY (numero, nom_planta),
     CONSTRAINT fk_exemplars_plantes_to_plantes FOREIGN KEY (nom_planta) REFERENCES plantes(nom_popular) ON DELETE CASCADE ON UPDATE CASCADE
