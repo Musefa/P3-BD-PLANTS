@@ -122,23 +122,21 @@ CREATE TABLE exemplars_plantes
     CONSTRAINT fk_exemplars_plantes_to_plantes FOREIGN KEY (nom_planta) REFERENCES plantes(nom_popular) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
-DROP VIEW IF EXISTS plantes_exterior_metodes;
-
 CREATE VIEW plantes_exterior_metodes AS
-    SELECT PE.nom_planta, P.nom_llati, COUNT(EP.numero)
-    FROM plantes_exterior PE
-        JOIN plantes P ON (PE.nom_planta = P.nom_popular)
+    SELECT P.nom_popular, P.nom_llati, COUNT(EP.numero)
+    FROM plantes P
         JOIN exemplars_plantes EP ON (P.nom_popular = EP.nom_planta)
-        JOIN reproduccions R ON (P.nom_popular = R.nom_planta)
-    GROUP BY PE.nom_planta, P.nom_llati
-HAVING COUNT(R.nom_metode) >= 2;
-
-DROP VIEW IF EXISTS temperatura_plantes_interior;
+    WHERE P.nom_popular in (SELECT PE.nom_planta
+                            FROM plantes_exterior PE)
+    AND (SELECT R.nom_planta
+         FROM reproduccions
+         GROUP BY R.nom_planta
+         HAVING COUNT(R.nom_metode) >= 2); /* Emprem subconsultes per evitar triple join */
 
 CREATE VIEW temperatura_plantes_interior AS
-    SELECT nom_planta, ubicacio_adient, temperatura_adient
-    FROM plantes_interior
-    WHERE temperatura_adient > 16.0;
+    SELECT PI.nom_planta, PI.ubicacio_adient, PI.temperatura_adient
+    FROM plantes_interior PI
+    WHERE PI.temperatura_adient > 16.0;
 
 DELIMITER //
 CREATE TRIGGER min_2_exemplars_insert
