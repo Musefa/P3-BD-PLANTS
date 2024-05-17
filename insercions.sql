@@ -58,7 +58,15 @@ insert into plantes_exterior(nom_planta, cicle_de_vida) values ("Crisantem", NUL
 insert into plantes_exterior(nom_planta, cicle_de_vida) values ("Cintes", "P");
 insert into plantes_exterior(nom_planta, cicle_de_vida) values ("Heura", "P"); /* LES PLANTES D'INTERIOR TAMBÉ TENEN TIPUS DE PLANTA, ERROR */
 
--- Exemplars plantes
+-- Exemplars plantes: ESTAN PENSADES PER REALITZAR-SE AMB EL PROCEDIMENT insereix_exemplar.
+call insereix_exemplar("Gerani", 6); 
+call insereix_exemplar("Begònia", 4); 
+call insereix_exemplar("Roser", 4); 
+call insereix_exemplar("Heura", 3); 
+call insereix_exemplar("Ficus Benjamina", 2); 
+call insereix_exemplar("Croton", 3); 
+call insereix_exemplar("Poinsetia", 2); 
+-- call insereix_exemplar("Ciclamen", 1); DESCOMENTAR PER PROVAR COM FALLA L'EXECUCIÓ.
 
 -- Firmes comercials
 insert into firmes_comercials(nom) values ("URVADOB");

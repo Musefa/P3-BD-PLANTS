@@ -12,7 +12,7 @@ CREATE TABLE firmes_comercials
 
 CREATE TABLE adobs
 (
-    nom CHAR(50) DEFAULT "default_adob",
+    nom CHAR(50),
     tipus CHAR(50),
     nom_firma_comercial CHAR(50) NOT NULL,
     CONSTRAINT pk_adobs PRIMARY KEY (nom),
@@ -27,7 +27,7 @@ CREATE TABLE estacions
 
 CREATE TABLE plantes
 (
-    nom_popular CHAR(50) DEFAULT "planta_default",
+    nom_popular CHAR(50),
     nom_llati CHAR(50) UNIQUE NOT NULL, /* Clau alternativa */
     CONSTRAINT pk_plantes PRIMARY KEY (nom_popular)
 ) ENGINE = InnoDB;
@@ -56,13 +56,13 @@ CREATE TABLE dosis_adobs
 
 CREATE TABLE metodes_reproduccio
 (
-    nom CHAR(50) DEFAULT "metode_default",
+    nom CHAR(50),
     CONSTRAINT pk_metodes_reproduccio PRIMARY KEY (nom)
 ) ENGINE = InnoDB;
 
 CREATE TABLE reproduccions (
-    nom_planta CHAR(50) DEFAULT "planta_default",
-    nom_metode CHAR(50) DEFAULT "metode_default",
+    nom_planta CHAR(50),
+    nom_metode CHAR(50),
     grau_exit CHAR(50),
     CONSTRAINT pk_reproduccions PRIMARY KEY (nom_planta, nom_metode),
     CONSTRAINT fk_reproduccions_to_plantes FOREIGN KEY (nom_planta) REFERENCES plantes(nom_popular) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -113,9 +113,9 @@ CREATE TABLE origen_plantes
 
 CREATE TABLE exemplars_plantes
 (
-    numero INT(2),
     nom_planta CHAR(50),
-    CONSTRAINT pk_exemplars_plantes PRIMARY KEY (numero, nom_planta),
+    numero INT(2),
+    CONSTRAINT pk_exemplars_plantes PRIMARY KEY (nom_planta, numero),
     CONSTRAINT fk_exemplars_plantes_to_plantes FOREIGN KEY (nom_planta) REFERENCES plantes(nom_popular) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
@@ -135,43 +135,8 @@ CREATE VIEW temperatura_plantes_interior AS
     FROM plantes_interior PI
     WHERE PI.temperatura_adient > 16.0;
 
+/* FUNCIONS + CONTROLS */
 DELIMITER //
--- CREATE TRIGGER min_2_exemplars_update
--- AFTER UPDATE ON exemplars_plantes
--- FOR EACH ROW
--- DECLARE 
---     CURSOR exemplars_invalids FOR (SELECT nom_planta
---                                   FROM exemplars_plantes
---                                   GROUP BY nom_planta
---                                   HAVING COUNT(*) = 1); /* 2 o + correcte, 0 correcte, 1 IMPOSSIBLE */
---     temp exemplars.nom_planta;
--- BEGIN
---     OPEN exemplars_invalids;
---     IF exemplars_invalids IS NOT NULL
---     THEN
---         FOR i IN exemplars_invalids 
---         DO
---             fetch exemplars_invalids into temp;
---             insert into exemplars(nom_planta) values (temp); /* Insertem tuples per tal d'evitar problemes */
-
---         END FOR;
---     END IF;
--- END
--- //
-
--- CREATE TRIGGER min_2_exemplars_delete
--- AFTER DELETE ON exemplars_plantes
--- FOR EACH ROW
--- BEGIN
---     IF 1 in (SELECT COUNT(*) /* Sintaxis estàndard no respectada */
---              FROM exemplars_plantes
---              GROUP BY nom_planta) /* 2 o més és correcte, 0 és correcte */
---     THEN
---         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "Com a minim hi ha d'haver 2 exemplars per cada planta.";
---     END IF;
--- END
--- //
-
 CREATE PROCEDURE insereix_exemplar(IN nom_plant char(50), IN num_exemplars int)
 BEGIN
     DECLARE last_exemplar TYPE OF exemplars_plantes.numero;
@@ -192,7 +157,7 @@ BEGIN
     ELSE
         IF last_exemplar IS NULL
         THEN 
-            SET last_exemplar = 0; 
+            SET last_exemplar = 1; 
         END IF; /* Si no hi ha cap tupla de plantes, és el primer exemplar, el 0 */
 
         FOR i IN 1..num_exemplars 
@@ -201,13 +166,40 @@ BEGIN
             DO
                 SET last_exemplar = last_exemplar + 1; /* Incrementem el nombre d'exemplar en 1 mentre estigui dins de la taula */
             END WHILE;
-            insert into exemplars_plantes(numero, nom_planta) values (last_exemplar, nom_plant);
+            insert into exemplars_plantes(nom_planta, numero) values (nom_plant, last_exemplar);
             SET last_exemplar = last_exemplar + 1; /* Següent nombre d'exemplar */
         END FOR;
     END IF;
 END
 //
 
+CREATE TRIGGER min_2_exemplars_update
+AFTER UPDATE ON exemplars_plantes
+FOR EACH ROW
+BEGIN
+    IF 1 in (SELECT COUNT(*) /* Sintaxis estàndard no respectada */
+             FROM exemplars_plantes
+             GROUP BY nom_planta) /* 2 o més és correcte, 0 és correcte */
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "Com a minim hi ha d'haver 2 exemplars per cada planta.";
+    END IF;
+END
+//
+
+CREATE TRIGGER min_2_exemplars_delete
+AFTER DELETE ON exemplars_plantes
+FOR EACH ROW
+BEGIN
+    IF 1 in (SELECT COUNT(*) /* Sintaxis estàndard no respectada */
+             FROM exemplars_plantes
+             GROUP BY nom_planta) /* 2 o més és correcte, 0 és correcte */
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "Com a minim hi ha d'haver 2 exemplars per cada planta.";
+    END IF;
+END
+//
+
+/* INSERTAR EN DOCU */
 -- CREATE TRIGGER plantes_to_reproduccions
 -- AFTER INSERT ON plantes
 -- FOR EACH ROW
@@ -270,6 +262,36 @@ BEGIN
                    WHERE A.nom = nom_adob_intr)
     THEN
         insert into adobs(nom, tipus, nom_firma_comercial) values (nom_adob_intr, tipus_adob_intr, nom_firma); /* Insertar en adobs si l'adob no està introduit. Si l'usuari introdueix informació errònia de l'adob (nova firma, nou tipus, no es modificarà) */
+    END IF;
+END
+//
+
+CREATE TRIGGER actualitza_adobs
+AFTER UPDATE ON adobs
+FOR EACH ROW
+BEGIN
+    IF  0 = (
+                SELECT COUNT(*)
+                FROM adobs A
+                WHERE A.nom_firma_comercial = OLD.nom_firma_comercial
+            )
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot actualitzar l'adob, ja que no hi ha cap adob associat a la firma comercial.";
+    END IF;
+END
+//
+
+CREATE TRIGGER elimina_adobs
+AFTER DELETE ON adobs
+FOR EACH ROW
+BEGIN
+    IF  0 = (
+            SELECT COUNT(*)
+            FROM adobs A
+            WHERE A.nom_firma_comercial = OLD.nom_firma_comercial
+            )
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot eliminar l'adob, ja que no hi ha cap adob associat a la firma comercial.";
     END IF;
 END
 //
