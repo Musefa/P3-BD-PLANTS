@@ -122,13 +122,14 @@ CREATE TABLE exemplars_plantes
 CREATE VIEW plantes_exterior_metodes AS
     SELECT P.nom_popular, P.nom_llati, COUNT(EP.numero)
     FROM plantes P
-        JOIN exemplars_plantes EP ON (P.nom_popular = EP.nom_planta)
+        LEFT OUTER JOIN exemplars_plantes EP ON (P.nom_popular = EP.nom_planta)
     WHERE P.nom_popular in (SELECT PE.nom_planta
                             FROM plantes_exterior PE)
-    AND (SELECT R.nom_planta
-         FROM reproduccions R
-         GROUP BY R.nom_planta
-         HAVING COUNT(R.nom_metode) >= 2); /* Emprem subconsultes per evitar triple join */
+    AND P.nom_popular IN (SELECT R.nom_planta
+                          FROM reproduccions R
+                          GROUP BY R.nom_planta
+                          HAVING COUNT(R.nom_metode) >= 2) /* Emprem subconsultes per evitar triple join */
+    GROUP BY P.nom_popular, P.nom_llati;
 
 CREATE VIEW temperatura_plantes_interior AS
     SELECT PI.nom_planta, PI.ubicacio_adient, PI.temperatura_adient
