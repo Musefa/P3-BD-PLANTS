@@ -3,6 +3,9 @@ DROP SCHEMA IF EXISTS PLANTS;
 CREATE SCHEMA PLANTS;
 USE PLANTS;
 
+-- Variables de la sessió
+SET @control = 0;
+
 -- DEFINICION DE TABLAS DE LA BASE DE DATOS
 CREATE TABLE firmes_comercials
 (
@@ -142,34 +145,27 @@ CREATE TRIGGER min_2_exemplars
 BEFORE INSERT ON exemplars_plantes
 FOR EACH ROW
 BEGIN
-    IF 2 > (SELECT COUNT(*)
-            FROM exemplars_plantes
-            WHERE nom_planta = new.nom_planta) 
+    IF @control <> 1
     THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "Empra el procediment insereix_exemplar per poder introduir-los.";
-    ELSE
-        insert into exemplars_plantes(nom_planta) values (new.nom_planta);
     END IF;
 END
 //  
 
+
 CREATE PROCEDURE insereix_exemplar(IN nom_plant char(50), IN num_exemplars int)
 BEGIN
-    IF num_exemplars < 2
+    IF num_exemplars < 2 AND  2 > (SELECT COUNT(*)
+                                   FROM exemplars_plantes
+                                   WHERE nom_planta = nom_plant)
     THEN    
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "Com a minim ha d'haver 2 exemplars per cada planta.";
     ELSE
-        SET @disable_trigger = "ALTER TABLE exemplars_plantes DISABLE TRIGGER min_2_exemplars";
-        SET @enable_trigger = "ALTER TABLE exemplars_plantes ENABLE TRIGGER min_2_exemplars";
-        PREPARE disable_trigger FROM @disable_trigger;
-        EXECUTE disable_trigger;
-
+        SET @control = 1;
         FOR i IN 1..num_exemplars DO
-            insert into exemplars_plantes(nom_planta) values (nom_planta);
+            insert into exemplars_plantes(nom_planta) values (nom_plant);
         END FOR;
-        PREPARE enable_trigger FROM @enable_trigger;
-        EXECUTE enable_trigger;
-        
+        SET @control = 0;
     END IF;
 END
 //
