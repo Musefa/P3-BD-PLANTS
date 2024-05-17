@@ -153,12 +153,25 @@ END
 //  
 
 CREATE TRIGGER min_2_exemplars_update
-BEFORE UPDATE ON exemplars_plantes
+AFTER UPDATE ON exemplars_plantes
 FOR EACH ROW
 BEGIN
-    IF (SELECT COUNT(*) /* Sintaxis estàndard no respectada */
-        FROM exemplars_plantes
-        GROUP BY nom_planta) = 1 /* 2 o més és correcte, 0 és correcte */
+    IF 1 in (SELECT COUNT(*) /* Sintaxis estàndard no respectada */
+             FROM exemplars_plantes
+             GROUP BY nom_planta) /* 2 o més és correcte, 0 és correcte */
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "Com a minim ha d'haver 2 exemplars per cada planta.";
+    END IF;
+END
+//
+
+CREATE TRIGGER min_2_exemplars_delete
+AFTER DELETE ON exemplars_plantes
+FOR EACH ROW
+BEGIN
+    IF 1 in (SELECT COUNT(*) /* Sintaxis estàndard no respectada */
+             FROM exemplars_plantes
+             GROUP BY nom_planta) /* 2 o més és correcte, 0 és correcte */
     THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "Com a minim ha d'haver 2 exemplars per cada planta.";
     END IF;
