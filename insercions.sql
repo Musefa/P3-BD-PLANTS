@@ -1,15 +1,5 @@
 -- INSERCIONS A LA BASE DE DADES DE LES TUPLES DE L'ANNEX.
 
--- Floració
--- insert into floracio(nom_planta, nom_estacio) values ("Gerani", "Primavera");
--- insert into floracio(nom_planta, nom_estacio) values ("Begònia", "Estiu");
--- insert into floracio(nom_planta, nom_estacio) values ("Camèlia", "Primavera");
--- insert into floracio(nom_planta, nom_estacio) values ("Ciclamen", "Hivern");
--- insert into floracio(nom_planta, nom_estacio) values ("Roser", "Primavera");
--- insert into floracio(nom_planta, nom_estacio) values ("Tulipa", "Primavera");
--- insert into floracio(nom_planta, nom_estacio) values ("Crisantem", "Estiu");
--- insert into floracio(nom_planta, nom_estacio) values ("Poinsetia", "Hivern");
-
 -- -- Mètodes de reproducció.
 -- insert into metodes_reproduccio(nom) values ("Llavors");
 -- insert into metodes_reproduccio(nom) values ("Esqueix");
@@ -174,4 +164,12 @@ insert into dosis_adobs(nom_planta, nom_estacio, nom_adob, quantitat_adob) value
 insert into dosis_adobs(nom_planta, nom_estacio, nom_adob, quantitat_adob) values ("Gerani", "Estiu", "Sanexplant", 40.0);
 insert into dosis_adobs(nom_planta, nom_estacio, nom_adob, quantitat_adob) values ("Ficus Benjamina", "Primavera", "Casadob", 50.0);
 
-
+-- Floració
+insert into floracio(nom_planta, nom_estacio) values ("Gerani", "Primavera");
+insert into floracio(nom_planta, nom_estacio) values ("Begonia", "Estiu");
+insert into floracio(nom_planta, nom_estacio) values ("Camelia", "Primavera");
+insert into floracio(nom_planta, nom_estacio) values ("Ciclamen", "Hivern");
+insert into floracio(nom_planta, nom_estacio) values ("Roser", "Primavera");
+insert into floracio(nom_planta, nom_estacio) values ("Tulipa", "Primavera");
+insert into floracio(nom_planta, nom_estacio) values ("Crisantem", "Estiu");
+insert into floracio(nom_planta, nom_estacio) values ("Poinsetia", "Hivern");
