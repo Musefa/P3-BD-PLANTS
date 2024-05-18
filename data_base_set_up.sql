@@ -255,6 +255,40 @@ BEGIN
 END
 //
 
+CREATE TRIGGER update_reproduccions_restrict
+AFTER UPDATE ON reproduccions
+FOR EACH ROW
+BEGIN
+    IF OLD.nom_planta NOT IN (SELECT R.nom_planta
+                              FROM reproduccions R) /* Si no queden plantes després de l'actualització */
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot actualitzar la reproduccio, ja que si no hi hauria plantes o metodes sense cap reproduccio assignada.";
+    END IF;
+    IF OLD.nom_metode NOT IN (SELECT R.nom_metode
+                              FROM reproduccions R) /* Si no queden metodes després de l'actualització */
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot actualitzar la reproduccio, ja que si no hi hauria plantes o metodes sense cap reproduccio assignada.";
+    END IF;
+END
+//
+
+CREATE TRIGGER delete_reproduccions_restrict
+AFTER DELETE ON reproduccions
+FOR EACH ROW
+BEGIN
+    IF OLD.nom_planta NOT IN (SELECT R.nom_planta
+                              FROM reproduccions R) /* Si no queden plantes després de l'esborrat */
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot esborrar la reproduccio, ja que si no hi hauria plantes o metodes sense cap reproduccio assignada.";
+    END IF;
+    IF OLD.nom_metode NOT IN (SELECT R.nom_metode
+                              FROM reproduccions R) /* Si no queden metodes després de l'esborrat */
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot esborrar la reproduccio, ja que si no hi hauria plantes o metodes sense cap reproduccio assignada.";
+    END IF;
+END
+//
+
 CREATE PROCEDURE inicialitza_firma_comercial(IN nom_firma CHAR(50), IN nom_adob_intr CHAR (50), IN tipus_adob_intr CHAR(50))
 BEGIN
     insert into firmes_comercials(nom) values (nom_firma);
