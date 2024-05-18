@@ -331,9 +331,18 @@ BEGIN
 END
 //
 
-CREATE PROCEDURE insereix_planta_interior_i_estacio_rec
-    (IN nom_planta_int CHAR(50), IN ubicacio CHAR(50), IN temp CHAR(50), IN nom_estacio_rec CHAR(50), IN qtat_aigua int) /* CAL CONTROLAR LA INTEGRITAT D'INSERSCIONS DE PLANTES D'INTERIOR AMB LA SEVA SUPERTIPUS I EXTERIORS */
+CREATE PROCEDURE insereix_planta_interior
+    (IN nom_planta_int CHAR(50), IN ubicacio CHAR(50), IN temp CHAR(50), IN nom_estacio_rec CHAR(50), IN qtat_aigua int, IN primer_pais_obligatori CHAR(50)) /* CAL CONTROLAR LA INTEGRITAT D'INSERSCIONS DE PLANTES D'INTERIOR AMB LA SEVA SUPERTIPUS I EXTERIORS */
+    /* Com a mínim la planta ha d'estar associada a un país, que es demana en aquesta funció d'inserció */
+    /* Per inserir nous origens de paísos, cal afegir-los amb un insert into */
 BEGIN
+    IF NOT EXISTS (SELECT *
+                   FROM paisos
+                   WHERE nom = primer_pais_obligatori)
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "El pais al qual es vol assignar la planta no existeix en la base de dades. Inserta'l primer.";
+    END IF;
+
     IF NOT EXISTS (SELECT *
                    FROM plantes_interior P
                    WHERE P.nom_planta = nom_planta_int)
@@ -347,7 +356,9 @@ BEGIN
     THEN
         insert into estacions(nom) values (nom_estacio_rec); /* Insertem si l'estació no existeix en la BD encara */
     END IF;
+
     insert into rec_plantes(nom_planta_interior, nom_estacio, quantitat_aigua) values (nom_planta_int, nom_estacio_rec, qtat_aigua);
+    insert into origen_plantes(nom_planta_interior, nom_pais) values (nom_planta_int, primer_pais_obligatori);
 END
 //
 
@@ -358,12 +369,12 @@ BEGIN
     IF OLD.nom_planta_interior NOT IN (SELECT R.nom_planta_interior
                                        FROM rec_plantes R) /* Si no queden plantes d'interior després de l'actualització */
     THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot actualitzar la informació del rec, ja que si no hi hauria plantes d'interior o mètodes sense cap rec assignat.";
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot actualitzar la informacio del rec, ja que si no hi hauria plantes d'interior o metodes sense cap rec assignat.";
     END IF;
     IF OLD.nom_estacio NOT IN (SELECT R.nom_estacio_rec
                                FROM rec_plantes R) /* Si no queden estacions després de l'actualització */
     THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot actualitzar la informació del rec, ja que si no hi hauria plantes d'interior o mètodes sense cap rec assignat.";
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot actualitzar la informacio del rec, ja que si no hi hauria plantes d'interior o metodes sense cap rec assignat.";
     END IF;
 END
 //
@@ -372,16 +383,107 @@ CREATE TRIGGER delete_rec_plantes_restrict
 AFTER DELETE ON rec_plantes
 FOR EACH ROW
 BEGIN
-    IF OLD.nom_planta_interior NOT IN (SELECT R.nom_planta_int
+    IF OLD.nom_planta_interior NOT IN (SELECT R.nom_planta_interior
                                        FROM rec_plantes R) /* Si no queden plantes d'interior després de l'esborrat */
     THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot esborrar la informació del rec, ja que si no hi hauria plantes d'interior o mètodes sense cap rec assignat.";
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot esborrar la informacio del rec, ja que si no hi hauria plantes d'interior o metodes sense cap rec assignat.";
     END IF;
     IF OLD.nom_estacio NOT IN (SELECT R.nom_estacio
                               FROM rec_plantes R) /* Si no queden estacions després de l'esborrat */
     THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot esborrar la informació del rec, ja que si no hi hauria plantes d'interior o mètodes sense cap rec assignat.";
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot esborrar la informacio del rec, ja que si no hi hauria plantes d'interior o metodes sense cap rec assignat.";
     END IF;
+END
+//
+
+CREATE TRIGGER update_origen_plantes_restrict
+AFTER UPDATE ON origen_plantes
+FOR EACH ROW
+BEGIN
+    IF OLD.nom_planta_interior NOT IN (SELECT R.nom_planta_interior
+                                       FROM origen_plantes R) /* Si no queden plantes d'interior després de l'actualització */
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot actualitzar la informacio de l'origen, ja que si no hi hauria plantes d'interior sense cap origen assignat.";
+    END IF;
+    /* No cal controlar-ho per països ja que és opcional a la interrelació */
+END
+//
+
+CREATE TRIGGER delete_origen_plantes_restrict
+AFTER DELETE ON origen_plantes
+FOR EACH ROW
+BEGIN
+    IF OLD.nom_planta_interior NOT IN (SELECT R.nom_planta_interior
+                                       FROM origen_plantes R) /* Si no queden plantes d'interior després de l'esborrat */
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot esborrar la informacio del rec, ja que si no hi hauria plantes d'interior o metodes sense cap rec assignat.";
+    END IF;
+    /* No cal controlar-ho per països ja que és opcional a la interrelació */
+END
+//
+
+/* DAVANT D'INSERCIONS O MODIFICACIONS, NOMÉS ES CONTROLA ENTRE LES SUBTIPUS, LA SUPERTIPUS QUEDA CONTROLADA PER LES RESTRICCIONS DE PRIMARY KEY */
+CREATE TRIGGER planta_interior_not_into_planta_exterior_insert
+BEFORE INSERT ON plantes_interior /* Qualsevol modificació en aquesta relació */
+FOR EACH ROW
+BEGIN
+    IF new.nom_planta IN (SELECT PE.nom_planta
+                          FROM plantes_exterior PE)
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot inserir la planta d'interior ja que es una planta d'exterior";
+    END IF;
+END
+//
+
+CREATE TRIGGER planta_interior_not_into_planta_exterior_update
+BEFORE UPDATE ON plantes_interior /* Qualsevol modificació en aquesta relació */
+FOR EACH ROW
+BEGIN
+    IF new.nom_planta IN (SELECT PE.nom_planta
+                          FROM plantes_exterior PE)
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot modificar la planta d'interior ja que es una planta d'exterior";
+    END IF;
+END
+//
+
+CREATE TRIGGER planta_exterior_not_into_planta_interior_insert
+BEFORE INSERT ON plantes_exterior /* Qualsevol modificació en aquesta relació */
+FOR EACH ROW
+BEGIN
+    IF new.nom_planta IN (SELECT PE.nom_planta
+                          FROM plantes_interior PE)
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot inserir la planta d'exterior ja que es una planta d'interior";
+    END IF;
+END
+//
+
+CREATE TRIGGER planta_exterior_not_into_planta_interior_update
+BEFORE UPDATE ON plantes_exterior /* Qualsevol modificació en aquesta relació */
+FOR EACH ROW
+BEGIN
+    IF new.nom_planta IN (SELECT PE.nom_planta
+                          FROM plantes_interior PE)
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot modificar la planta d'exterior ja que es una planta d'interior";
+    END IF;
+END
+//
+
+CREATE TRIGGER planta_exterior_delete
+AFTER DELETE ON plantes_exterior
+FOR EACH ROW
+BEGIN
+    delete from plantes where nom_popular = old.nom_planta; /* S'elimina la planta de la base de dades també */
+END
+//
+
+CREATE TRIGGER planta_interior_delete
+AFTER DELETE ON plantes_interior
+FOR EACH ROW
+BEGIN
+    delete from plantes where nom_popular = old.nom_planta; /* S'elimina la planta de la base de dades també */
 END
 //
 
