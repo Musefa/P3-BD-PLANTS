@@ -249,7 +249,7 @@ BEGIN
                    FROM metodes_reproduccio MR
                    WHERE MR.nom = nom_metode_reproduccio)
     THEN
-        insert into metodes_reproduccio(nom) values (nom_metode_reproduccio); /* Insertem si la planta no existeix en la BD encara */
+        insert into metodes_reproduccio(nom) values (nom_metode_reproduccio); /* Insertem si el mètode de reproducció no existeix en la BD encara */
     END IF;
     insert into reproduccions(nom_planta, nom_metode, grau_exit) values (nom_popu_planta, nom_metode_reproduccio, grau_exit_intr);
 END
@@ -327,6 +327,60 @@ BEGIN
             )
     THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot eliminar l'adob, ja que no hi ha cap adob associat a la firma comercial.";
+    END IF;
+END
+//
+
+CREATE PROCEDURE insereix_planta_interior_i_estacio_rec
+    (IN nom_planta_int CHAR(50), IN ubicacio CHAR(50), IN temp CHAR(50), IN nom_estacio_rec CHAR(50), IN qtat_aigua int) /* CAL CONTROLAR LA INTEGRITAT D'INSERSCIONS DE PLANTES D'INTERIOR AMB LA SEVA SUPERTIPUS I EXTERIORS */
+BEGIN
+    IF NOT EXISTS (SELECT *
+                   FROM plantes_interior P
+                   WHERE P.nom_planta = nom_planta_int)
+    THEN
+        insert into plantes_interior(nom_planta, ubicacio_adient, tempertura_adient) values (nom_planta_int, ubicacio, temp); /* Insertem si la planta d'interior no existeix en la BD encara */
+    END IF;
+
+    IF NOT EXISTS (SELECT *
+                   FROM estacions MR
+                   WHERE MR.nom = nom_estacio_rec)
+    THEN
+        insert into estacions(nom) values (nom_estacio_rec); /* Insertem si l'estació no existeix en la BD encara */
+    END IF;
+    insert into rec_plantes(nom_planta_interior, nom_estacio, quantitat_aigua) values (nom_planta_int, nom_estacio_rec, qtat_aigua);
+END
+//
+
+CREATE TRIGGER update_rec_plantes_restrict
+AFTER UPDATE ON rec_plantes
+FOR EACH ROW
+BEGIN
+    IF OLD.nom_planta_interior NOT IN (SELECT R.nom_planta_interior
+                                       FROM rec_plantes R) /* Si no queden plantes d'interior després de l'actualització */
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot actualitzar la informació del rec, ja que si no hi hauria plantes d'interior o mètodes sense cap rec assignat.";
+    END IF;
+    IF OLD.nom_estacio NOT IN (SELECT R.nom_estacio_rec
+                               FROM rec_plantes R) /* Si no queden estacions després de l'actualització */
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot actualitzar la informació del rec, ja que si no hi hauria plantes d'interior o mètodes sense cap rec assignat.";
+    END IF;
+END
+//
+
+CREATE TRIGGER delete_rec_plantes_restrict
+AFTER DELETE ON rec_plantes
+FOR EACH ROW
+BEGIN
+    IF OLD.nom_planta_interior NOT IN (SELECT R.nom_planta_int
+                                       FROM rec_plantes R) /* Si no queden plantes d'interior després de l'esborrat */
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot esborrar la informació del rec, ja que si no hi hauria plantes d'interior o mètodes sense cap rec assignat.";
+    END IF;
+    IF OLD.nom_estacio NOT IN (SELECT R.nom_estacio
+                              FROM rec_plantes R) /* Si no queden estacions després de l'esborrat */
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot esborrar la informació del rec, ja que si no hi hauria plantes d'interior o mètodes sense cap rec assignat.";
     END IF;
 END
 //
