@@ -1,3 +1,4 @@
+-- Consulta número 5
 SELECT DISTINCT P_I.nom_planta, P_I.ubicacio_adient
 FROM plantes_interior P_I
 WHERE P_I.nom_planta NOT IN (SELECT R.nom_planta
