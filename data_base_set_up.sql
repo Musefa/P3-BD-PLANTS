@@ -119,6 +119,7 @@ CREATE TABLE exemplars_plantes
     CONSTRAINT fk_exemplars_plantes_to_plantes FOREIGN KEY (nom_planta) REFERENCES plantes(nom_popular) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB;
 
+DELIMITER //
 CREATE VIEW plantes_exterior_metodes AS
     SELECT P.nom_popular, P.nom_llati, COUNT(EP.numero)
     FROM plantes P
@@ -129,16 +130,18 @@ CREATE VIEW plantes_exterior_metodes AS
                           FROM reproduccions R
                           GROUP BY R.nom_planta
                           HAVING COUNT(R.nom_metode) >= 2) /* Emprem subconsultes per evitar triple join */
-    GROUP BY P.nom_popular, P.nom_llati;
+    GROUP BY P.nom_popular, P.nom_llati
+//
 
 CREATE VIEW temperatura_plantes_interior AS
     SELECT PI.nom_planta, PI.ubicacio_adient, PI.temperatura_adient
     FROM plantes_interior PI
-    WHERE PI.temperatura_adient > 16.0;
+    WHERE PI.temperatura_adient > 16.0
+WITH CHECK OPTION
+//
 
 /* FUNCIONS + CONTROLS */
-DELIMITER //
-CREATE PROCEDURE insereix_exemplar(IN nom_plant char(50), IN num_exemplars int)
+CREATE PROCEDURE insereix_exemplar(IN nom_plant type of plantes.nom_popular, IN num_exemplars type of exemplars_plantes.numero)
 BEGIN
     DECLARE last_exemplar TYPE OF exemplars_plantes.numero;
 
@@ -148,7 +151,7 @@ BEGIN
     WHERE nom_planta = nom_plant
     AND numero + 1 NOT IN (SELECT numero
                            FROM exemplars_plantes
-                           WHERE nom_planta = nom_plant); /* Llistat de números de exemplars */    
+                           WHERE nom_planta = nom_plant); /* Llistat de números d'exemplars */    
 
     IF num_exemplars < 2 AND  2 > (SELECT COUNT(*)
                                    FROM exemplars_plantes
