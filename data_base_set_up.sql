@@ -294,14 +294,14 @@ END
 
 CREATE PROCEDURE inicialitza_firma_comercial(IN nom_firma type of firmes_comercials.nom, IN nom_adob_intr type of adobs.nom, IN tipus_adob_intr type of adobs.tipus)
 BEGIN
+    insert into firmes_comercials(nom) values (nom_firma);
     IF NOT EXISTS (SELECT *
                    FROM adobs A
                    WHERE A.nom = nom_adob_intr)
     THEN
-        insert into firmes_comercials(nom) values (nom_firma);
-        insert into adobs(nom, tipus, nom_firma_comercial) values (nom_adob_intr, tipus_adob_intr, nom_firma); /* Insertar en adobs si l'adob no està introduit. Si l'usuari introdueix informació errònia de l'adob (nova firma, nou tipus, no es modificarà) */
+        insert into adobs(nom, tipus, nom_firma_comercial) values (nom_adob_intr, tipus_adob_intr, nom_firma); /* Insertar en adobs si l'adob no està introduït. Si l'usuari introdueix informació errònia de l'adob (nova firma, nou tipus, no es modificarà) */
     ELSE
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "L'adob al qual s'intenta vincular aquesta nova firma ja té una firma associada en la base de dades.";
+        update adobs set nom_firma_comercial = nom_firma where nom = nom_adob_intr;
     END IF;
 END
 //
