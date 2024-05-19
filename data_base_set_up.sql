@@ -43,9 +43,9 @@ CREATE TABLE floracio
 
 CREATE TABLE dosis_adobs
 (
-    nom_planta CHAR(20),
-    nom_estacio CHAR(20),
-    nom_adob CHAR(20),
+    nom_planta CHAR(50),
+    nom_estacio CHAR(50),
+    nom_adob CHAR(50),
     quantitat_adob FLOAT(5,2),
     CONSTRAINT pk_dosis_adobs PRIMARY KEY (nom_planta, nom_estacio, nom_adob),
     CONSTRAINT fk_dosis_adobs_to_plantes FOREIGN KEY (nom_planta) REFERENCES plantes(nom_popular) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -236,7 +236,7 @@ END
 -- END
 -- //
 
-CREATE PROCEDURE insereix_planta(IN nom_popu_planta CHAR(50), IN nom_llati_planta CHAR(50), IN nom_metode_reproduccio CHAR(50), IN grau_exit_intr CHAR(50))
+CREATE PROCEDURE insereix_planta(IN nom_popu_planta type of plantes.nom_popular, IN nom_llati_planta type of plantes.nom_llati, IN nom_metode_reproduccio type of metodes_reproduccio.nom, IN grau_exit_intr type of reproduccions.grau_exit)
 BEGIN
     IF NOT EXISTS (SELECT *
                    FROM plantes P
@@ -289,7 +289,7 @@ BEGIN
 END
 //
 
-CREATE PROCEDURE inicialitza_firma_comercial(IN nom_firma CHAR(50), IN nom_adob_intr CHAR (50), IN tipus_adob_intr CHAR(50))
+CREATE PROCEDURE inicialitza_firma_comercial(IN nom_firma type of firmes_comercials.nom, IN nom_adob_intr type of adobs.nom, IN tipus_adob_intr type of adobs.tipus)
 BEGIN
     insert into firmes_comercials(nom) values (nom_firma);
     IF NOT EXISTS (SELECT *
@@ -305,11 +305,9 @@ CREATE TRIGGER actualitza_adobs
 AFTER UPDATE ON adobs
 FOR EACH ROW
 BEGIN
-    IF  0 = (
-                SELECT COUNT(*)
-                FROM adobs A
-                WHERE A.nom_firma_comercial = OLD.nom_firma_comercial
-            )
+    IF  0 = (SELECT COUNT(*)
+             FROM adobs A
+             WHERE A.nom_firma_comercial = OLD.nom_firma_comercial)
     THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot actualitzar l'adob, ja que no hi ha cap adob associat a la firma comercial.";
     END IF;
@@ -320,11 +318,9 @@ CREATE TRIGGER elimina_adobs
 AFTER DELETE ON adobs
 FOR EACH ROW
 BEGIN
-    IF  0 = (
-            SELECT COUNT(*)
-            FROM adobs A
-            WHERE A.nom_firma_comercial = OLD.nom_firma_comercial
-            )
+    IF  0 = (SELECT COUNT(*)
+             FROM adobs A
+             WHERE A.nom_firma_comercial = OLD.nom_firma_comercial)
     THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot eliminar l'adob, ja que no hi ha cap adob associat a la firma comercial.";
     END IF;
