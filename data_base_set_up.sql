@@ -314,7 +314,7 @@ BEGIN
              FROM adobs A
              WHERE A.nom_firma_comercial = OLD.nom_firma_comercial)
     THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot actualitzar l'adob, ja que no hi ha cap adob associat a la firma comercial.";
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot actualitzar l'adob, ja que no hi ha cap adob associat a la firma comercial que tenia assignada aquest adob prèviament.";
     END IF;
 END
 //
@@ -327,7 +327,7 @@ BEGIN
              FROM adobs A
              WHERE A.nom_firma_comercial = OLD.nom_firma_comercial)
     THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot eliminar l'adob, ja que no hi ha cap adob associat a la firma comercial.";
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot eliminar l'adob, ja que no hi ha cap adob associat a la firma comercial que tenia assignada aquest adob que s'intenta eliminar.";
     END IF;
 END
 //
@@ -451,15 +451,11 @@ BEGIN
 END
 //
 
-CREATE TRIGGER planta_interior_not_into_planta_exterior_update
-BEFORE UPDATE ON plantes_interior /* Qualsevol modificació en aquesta relació */
+CREATE TRIGGER planta_interior_update
+BEFORE UPDATE ON plantes_interior 
 FOR EACH ROW
 BEGIN
-    IF new.nom_planta IN (SELECT PE.nom_planta
-                          FROM plantes_exterior PE)
-    THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot modificar la planta d'interior ja que es una planta d'exterior";
-    END IF;
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "Per realitzar actualitzacions cal actualitzar plantes.";
 END
 //
 
@@ -475,15 +471,11 @@ BEGIN
 END
 //
 
-CREATE TRIGGER planta_exterior_not_into_planta_interior_update
-BEFORE UPDATE ON plantes_exterior /* Qualsevol modificació en aquesta relació */
+CREATE TRIGGER planta_exterior_update
+BEFORE UPDATE ON plantes_exterior
 FOR EACH ROW
 BEGIN
-    IF new.nom_planta IN (SELECT PE.nom_planta
-                          FROM plantes_interior PE)
-    THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot modificar la planta d'exterior ja que es una planta d'interior";
-    END IF;
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "Per realitzar actualitzacions cal actualitzar plantes.";
 END
 //
 
