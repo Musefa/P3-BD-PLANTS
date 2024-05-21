@@ -337,12 +337,11 @@ END
 CREATE PROCEDURE insereix_planta_interior
     (IN nom_popu_planta type of plantes.nom_popular, IN nom_llati_planta type of plantes.nom_llati, IN nom_metode_reproduccio type of reproduccions.nom_metode, IN grau_exit_intr type of reproduccions.grau_exit, 
      IN ubicacio type of plantes_interior.ubicacio_adient, IN temp type of plantes_interior.temperatura_adient, IN nom_estacio_rec type of estacions.nom, IN qtat_aigua type of rec_plantes.quantitat_aigua, 
-     IN primer_pais_obligatori type of paisos.nom) /* CAL CONTROLAR LA INTEGRITAT D'INSERSCIONS DE PLANTES D'INTERIOR AMB LA SEVA SUPERTIPUS I EXTERIORS */
+     IN primer_pais_obligatori type of paisos.nom) /* CAL CONTROLAR LA INTEGRITAT D'INSERCIONS DE PLANTES D'INTERIOR AMB LA SEVA SUPERTIPUS I EXTERIORS */
 
     /* Com a mínim la planta ha d'estar associada a un país, que es demana en aquesta funció d'inserció */
-    /* Per inserir nous origens de paísos, cal afegir-los amb un insert into */
+    /* Per inserir nous orígens de països, cal afegir-los amb un insert into */
 BEGIN
-
     IF NOT EXISTS (SELECT *
                 FROM paisos
                 WHERE nom = primer_pais_obligatori)
@@ -350,16 +349,9 @@ BEGIN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "El pais al qual es vol assignar la planta no existeix en la base de dades. Inserta'l primer.";
     END IF;
 
-    call insereix_planta(nom_popu_planta, nom_llati_planta, nom_metode_reproduccio, grau_exit_intr); /* En cas que la planta ja existeixi la restricció de primary key ja anularà l'execució com s'esperaria */
+    call insereix_planta(nom_popu_planta, nom_llati_planta, nom_metode_reproduccio, grau_exit_intr);
 
-    IF NOT EXISTS (SELECT *
-                FROM plantes_interior P
-                WHERE P.nom_planta = nom_popu_planta)
-    THEN
-        insert into plantes_interior(nom_planta, ubicacio_adient, temperatura_adient) values (nom_popu_planta, ubicacio, temp); /* Insertem si la planta d'interior no existeix en la BD encara */
-    ELSE
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "La planta d'interior ja existeix";
-    END IF;
+    insert into plantes_interior(nom_planta, ubicacio_adient, temperatura_adient) values (nom_popu_planta, ubicacio, temp); /* Insertem si la planta d'interior no existeix en la BD encara */
 
     IF NOT EXISTS (SELECT *
                 FROM estacions MR
@@ -368,23 +360,13 @@ BEGIN
         insert into estacions(nom) values (nom_estacio_rec); /* Insertem si l'estació no existeix en la BD encara */
     END IF;
 
-    IF NOT EXISTS (SELECT *
-                FROM rec_plantes
-                WHERE (nom_planta_interior, nom_estacio) = (nom_popu_planta, nom_estacio_rec))
-    THEN
-        insert into rec_plantes(nom_planta_interior, nom_estacio, quantitat_aigua) values (nom_popu_planta, nom_estacio_rec, qtat_aigua); /* Si introdueix erròniament informació repetida, no es té en compte */
-    END IF; 
+    insert into rec_plantes(nom_planta_interior, nom_estacio, quantitat_aigua) values (nom_popu_planta, nom_estacio_rec, qtat_aigua);
 
-    IF NOT EXISTS (SELECT *
-                FROM origen_plantes
-                WHERE (nom_planta_interior, nom_pais) = (nom_popu_planta, primer_pais_obligatori))
-    THEN
-        insert into origen_plantes(nom_planta_interior, nom_pais) values (nom_popu_planta, primer_pais_obligatori);
-    END IF;
+    insert into origen_plantes(nom_planta_interior, nom_pais) values (nom_popu_planta, primer_pais_obligatori);
 END
 //
 
-CREATE PROCEDURE insereix_o_vincula_estacio (IN nom_estacio_intr type of estacions.nom, IN nom_planta_interior_intr type of plantes_interior.nom_planta, IN qtat_aigua type of rec_plantes.quantitat_aigua)
+CREATE PROCEDURE insereix_rec_plantes (IN nom_estacio_intr type of estacions.nom, IN nom_planta_interior_intr type of plantes_interior.nom_planta, IN qtat_aigua type of rec_plantes.quantitat_aigua)
 BEGIN
     IF NOT EXISTS (SELECT *
                    FROM estacions
@@ -457,17 +439,6 @@ END
 //
 
 /* DAVANT D'INSERCIONS O MODIFICACIONS, NOMÉS ES CONTROLA ENTRE LES SUBTIPUS, LA SUPERTIPUS QUEDA CONTROLADA PER LES RESTRICCIONS DE PRIMARY KEY */
-CREATE TRIGGER planta_interior_not_into_planta_exterior_insert
-BEFORE INSERT ON plantes_interior /* Qualsevol modificació en aquesta relació */
-FOR EACH ROW
-BEGIN
-    IF new.nom_planta IN (SELECT PE.nom_planta
-                          FROM plantes_exterior PE)
-    THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot inserir la planta d'interior ja que es una planta d'exterior";
-    END IF;
-END
-//
 
 CREATE TRIGGER planta_interior_update
 BEFORE UPDATE ON plantes_interior 
@@ -476,18 +447,6 @@ BEGIN
     IF OLD.nom_planta <> NEW.nom_planta
     THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "Per realitzar actualitzacions sobre claus primaries cal actualitzar plantes."; /* Es restringeix la modificació */
-    END IF;
-END
-//
-
-CREATE TRIGGER planta_exterior_not_into_planta_interior_insert
-BEFORE INSERT ON plantes_exterior /* Qualsevol modificació en aquesta relació */
-FOR EACH ROW
-BEGIN
-    IF new.nom_planta IN (SELECT PE.nom_planta
-                          FROM plantes_interior PE)
-    THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot inserir la planta d'exterior ja que es una planta d'interior";
     END IF;
 END
 //
@@ -504,7 +463,7 @@ END
 //
 
 CREATE TRIGGER planta_exterior_delete
-AFTER DELETE ON plantes_exterior
+BEFORE DELETE ON plantes_exterior
 FOR EACH ROW
 BEGIN
     delete from plantes where nom_popular = old.nom_planta; /* S'elimina la planta de la base de dades també */
@@ -519,20 +478,78 @@ BEGIN
 END
 //
 
-CREATE PROCEDURE insereix_planta_exterior 
-    (IN nom_popu_planta type of plantes.nom_popular, IN nom_llati_planta type of plantes.nom_llati, IN nom_metode_reproduccio type of reproduccions.nom_metode, IN grau_exit_intr type of reproduccions.grau_exit, IN cicle_vida type of plantes_exterior.cicle_de_vida)
-BEGIN
-    call insereix_planta(nom_popu_planta, nom_llati_planta, nom_metode_reproduccio, grau_exit_intr); /* En cas que la planta ja existeixi la restricció de primary key ja anularà l'execució com s'esperaria */
-    IF NOT EXISTS (SELECT *
-                   FROM plantes_exterior
-                   WHERE nom_planta = nom_popu_planta)
+CREATE TRIGGER planta_delete
+AFTER DELETE ON plantes
+FOR EACH ROW
+BEGIN 
+    IF EXISTS (SELECT *
+               FROM metodes_reproduccio
+               WHERE nom NOT IN (SELECT nom_metode
+                                 FROM reproduccions))
     THEN
-        insert into plantes_exterior(nom_planta, cicle_de_vida) values (nom_popu_planta, cicle_vida);
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot esborrar la planta ja que si no quedaria algun metode de reproduccio no assignat a cap planta.";
+    END IF;
+    IF EXISTS (SELECT *
+               FROM estacions 
+               WHERE nom NOT IN (SELECT nom_estacio
+                                 FROM rec_plantes))    
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot esborrar la planta ja que si no quedaria alguna estacio sense cap rec assignat.";
     END IF;
 END
 //
 
-CREATE PROCEDURE vincula_o_insereix_reproduccio(IN nom_repro type of reproduccions.nom_metode, IN nom_planta type of plantes.nom_popular, IN grau_exit_intr type of reproduccions.grau_exit)
+CREATE TRIGGER metode_reproduccio_delete
+AFTER DELETE ON metodes_reproduccio
+FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT *
+               FROM plantes
+               WHERE nom_popular NOT IN (SELECT nom_planta
+                                         FROM reproduccions))
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot borra el metode ja que si no quedara alguna planta sense cap reproduccio associada.";
+    END IF;
+END
+//
+
+CREATE TRIGGER estacio_delete
+AFTER DELETE ON estacions
+FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT *
+               FROM plantes_interior
+               WHERE nom_planta NOT IN (SELECT nom_planta_interior
+                                        FROM rec_plantes))
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot esborrar l'estacio ja que quedaria alguna planta d'interior sense cap rec associat.";
+    END IF;
+END
+//
+
+CREATE TRIGGER pais_delete
+AFTER DELETE ON paisos
+FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT *
+               FROM plantes_interior
+               WHERE nom_planta NOT IN (SELECT nom_planta
+                                        FROM origen_plantes))
+    THEN 
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot esborrar el pais ja que si no quedaria alguna planta d'interior sense cap pais associat.";
+    END IF;
+END
+//
+
+CREATE PROCEDURE insereix_planta_exterior 
+    (IN nom_popu_planta type of plantes.nom_popular, IN nom_llati_planta type of plantes.nom_llati, IN nom_metode_reproduccio type of reproduccions.nom_metode, IN grau_exit_intr type of reproduccions.grau_exit, IN cicle_vida type of plantes_exterior.cicle_de_vida)
+BEGIN
+    call insereix_planta(nom_popu_planta, nom_llati_planta, nom_metode_reproduccio, grau_exit_intr);
+    insert into plantes_exterior(nom_planta, cicle_de_vida) values (nom_popu_planta, cicle_vida);
+END
+//
+
+CREATE PROCEDURE insereix_reproduccio(IN nom_repro type of reproduccions.nom_metode, IN nom_planta type of plantes.nom_popular, IN grau_exit_intr type of reproduccions.grau_exit)
 BEGIN
     IF NOT EXISTS (SELECT *
                    FROM metodes_reproduccio MR
@@ -544,7 +561,7 @@ BEGIN
 END
 //
 
-CREATE PROCEDURE vincula_o_insereix_origen_plantes 
+CREATE PROCEDURE insereix_origen_plantes 
     (IN nom_planta type of origen_plantes.nom_planta_interior, IN nom_pais type of origen_plantes.nom_pais)
 BEGIN
     IF NOT EXISTS (SELECT *
@@ -556,4 +573,5 @@ BEGIN
     insert into origen_plantes(nom_planta_interior, nom_pais) values (nom_planta, nom_pais);
 END
 //
+
 DELIMITER ;

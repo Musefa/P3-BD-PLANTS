@@ -24,16 +24,16 @@
 insert into paisos(nom) values("Espanya"), ("Alemanya"), ("EUA"), ("Marroc");
 
 -- PLANTES D'INTERIOR AMB PROCEDIMENT DISSENYAT (informació de recs i origens inventada donada la mancança en l'annex).
-call insereix_planta_interior("Potus", "Philodendron", "Capficats", "Mitjà", "Llum directa", 15.0, "Primavera", 10, "Espanya");
+call insereix_planta_interior("Potus", "Philodendron", "Capficats", "Mitja", "Llum directa", 15.0, "Primavera", 10, "Espanya");
 call insereix_planta_interior("Poinsetia", "Euphorbia", "Llavors", "Baix", "Llum indirecta", 18.0, "Estiu", 10, "Alemanya");
 -- call insereix_planta_interior("Poinsetia", "Euphorbia", "Esqueix", "Baix", "Llum indirecta", 18.0, "Estiu", 10, "Marroc");
-call vincula_o_insereix_reproduccio("Esqueix", "Poinsetia", "Baix");
+call insereix_reproduccio("Esqueix", "Poinsetia", "Baix");
 call insereix_planta_interior("Ficus Benjamina ", "Ficus", "Estaques", "Baix", "Llum indirecta", 19.0, "Tardor", 10, "EUA");
 -- call insereix_planta_interior("Ficus Benjamina ", "Ficus", "Capficats", "Baix", "Llum directa", 17.0, "Hivern", 15, "EUA");
-call vincula_o_insereix_reproduccio("Capficats", "Ficus Benjamina", "Baix");
+call insereix_reproduccio("Capficats", "Ficus Benjamina", "Baix");
 call insereix_planta_interior("Croton", "Codiaeum", "Esqueix", "Baix", "No corrents", 17.0, "Hivern", 15, "EUA");
 -- call insereix_planta_interior("Croton", "Codiaeum", "Capficats", "Baix", "No corrents", 17.0, "Tardor", 10, "Espanya");
-call vincula_o_insereix_reproduccio("Capficats", "Croton", "Baix");
+call insereix_reproduccio("Capficats", "Croton", "Baix");
 
 -- -- Plantes
 -- insert into plantes(nom_popular, nom_llati) values ("Gerani", "Pelargonium");
@@ -56,18 +56,18 @@ call vincula_o_insereix_reproduccio("Capficats", "Croton", "Baix");
 -- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Begònia", "Esqueix", "Alt"); /* A l'enunciat posa Exqueix, error o posat a propòsit? */
 -- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Begònia", "Capficats", "Alt"); 
 -- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Begònia", "Llavors", "Baix");
--- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Roser", "Estaques", "Mitjà");
+-- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Roser", "Estaques", "Mitja");
 -- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Cintes", "Estolons", "Alt");
 -- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Ciclamen", "Esqueix", "Alt");
 -- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Ciclamen", "Capficats", "Alt");
--- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Potus", "Capficats", "Mitjà");
+-- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Potus", "Capficats", "Mitja");
 -- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Potus", "Esqueix", "Alt");
 -- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Tulipa", "Bulbs", "Alt");
 -- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Ficus Benjamina", "Estaques", "Baix");
 -- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Ficus Benjamina", "Capficats", "Baix");
 -- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Croton", "Esqueix", "Baix");
 -- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Croton", "Capficats", "Baix");
--- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Falguera", "Esqueix", "Mitjà");
+-- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Falguera", "Esqueix", "Mitja");
 -- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Heura", "Esqueix", "Alt");
 -- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Crisantem", "Bulbs", "Alt");
 -- insert into reproduccions(nom_planta, nom_metode, grau_exit) values ("Camèlia", "Estaques", "Alt");
@@ -92,20 +92,20 @@ call insereix_planta_exterior("Gerani", "Pelargonium", "Esqueix", "Alt", "P");
 call insereix_planta_exterior("Begonia", "Begonia rex", "Esqueix", "Alt", "P");
 -- call insereix_planta_exterior("Begonia", "Begonia rex", "Capficats", "Alt", "T");
 -- call insereix_planta_exterior("Begonia", "Begonia rex", "Llavors", "Baix", "P");
-call vincula_o_insereix_reproduccio("Capficats", "Begonia", "Alt");
-call vincula_o_insereix_reproduccio("Llavors", "Begonia", "Baix");
+call insereix_reproduccio("Capficats", "Begonia", "Alt");
+call insereix_reproduccio("Llavors", "Begonia", "Baix");
 call insereix_planta_exterior("Camelia", "Camellia", "Estaques", "Alt", "P");
 call insereix_planta_exterior("Ciclamen", "Cyclamen", "Esqueix", "Alt", "P");
 -- call insereix_planta_exterior("Ciclamen", "Capficats", "Alt", "Alt", "P");
-call vincula_o_insereix_reproduccio("Capficats", "Ciclamen", "Alt");
-call insereix_planta_exterior("Roser", "Rosa", "Estaques", "Mitjà", "P");
-call insereix_planta_exterior("Falguera", "Polystichum", "Esqueix", "Mitjà", "P");
+call insereix_reproduccio("Capficats", "Ciclamen", "Alt");
+call insereix_planta_exterior("Roser", "Rosa", "Estaques", "Mitja", "P");
+call insereix_planta_exterior("Falguera", "Polystichum", "Esqueix", "Mitja", "P");
 call insereix_planta_exterior("Tulipa", "Tulipa", "Bulbs", "Alt", "T");
 call insereix_planta_exterior("Crisantem", "Chrysanthemum", "Bulbs", "Alt", NULL); /* Informació no proporcionada */ /*CANVIAR PER NULL SI QUEDA TEMPS */
 call insereix_planta_exterior("Cintes", "Chlorophytum", "Estolons", "Alt", "P");
 call insereix_planta_exterior("Heura", "Hedera", "Esqueix", "Alt", "P");
 -- call insereix_planta_exterior("Heura", "Hedera", "Capficats", "Alt", "P");
-call vincula_o_insereix_reproduccio("Capficats", "Heura", "Alt");
+call insereix_reproduccio("Capficats", "Heura", "Alt");
 
 -- Exemplars plantes: ESTAN PENSADES PER REALITZAR-SE AMB EL PROCEDIMENT insereix_exemplar.
 call insereix_exemplar("Gerani", 6); 
