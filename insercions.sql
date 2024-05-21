@@ -26,11 +26,14 @@ insert into paisos(nom) values("Espanya"), ("Alemanya"), ("EUA"), ("Marroc");
 -- PLANTES D'INTERIOR AMB PROCEDIMENT DISSENYAT (informació de recs i origens inventada donada la mancança en l'annex).
 call insereix_planta_interior("Potus", "Philodendron", "Capficats", "Mitjà", "Llum directa", 15.0, "Primavera", 10, "Espanya");
 call insereix_planta_interior("Poinsetia", "Euphorbia", "Llavors", "Baix", "Llum indirecta", 18.0, "Estiu", 10, "Alemanya");
-call insereix_planta_interior("Poinsetia", "Euphorbia", "Esqueix", "Baix", "Llum indirecta", 18.0, "Estiu", 10, "Marroc");
+-- call insereix_planta_interior("Poinsetia", "Euphorbia", "Esqueix", "Baix", "Llum indirecta", 18.0, "Estiu", 10, "Marroc");
+call vincula_o_insereix_reproduccio("Esqueix", "Poinsetia", "Baix");
 call insereix_planta_interior("Ficus Benjamina ", "Ficus", "Estaques", "Baix", "Llum indirecta", 19.0, "Tardor", 10, "EUA");
-call insereix_planta_interior("Ficus Benjamina ", "Ficus", "Capficats", "Baix", "Llum directa", 17.0, "Hivern", 15, "EUA"); /* Informació modificada s'ha d'ignorar */
+-- call insereix_planta_interior("Ficus Benjamina ", "Ficus", "Capficats", "Baix", "Llum directa", 17.0, "Hivern", 15, "EUA");
+call vincula_o_insereix_reproduccio("Capficats", "Ficus Benjamina", "Baix");
 call insereix_planta_interior("Croton", "Codiaeum", "Esqueix", "Baix", "No corrents", 17.0, "Hivern", 15, "EUA");
-call insereix_planta_interior("Croton", "Codiaeum", "Capficats", "Baix", "No corrents", 17.0, "Tardor", 10, "Espanya");
+-- call insereix_planta_interior("Croton", "Codiaeum", "Capficats", "Baix", "No corrents", 17.0, "Tardor", 10, "Espanya");
+call vincula_o_insereix_reproduccio("Capficats", "Croton", "Baix");
 
 -- -- Plantes
 -- insert into plantes(nom_popular, nom_llati) values ("Gerani", "Pelargonium");
@@ -87,18 +90,22 @@ call insereix_planta_interior("Croton", "Codiaeum", "Capficats", "Baix", "No cor
 -- PLANTES D'EXTERIOR AMB PROCEDIMENT DISSENYAT
 call insereix_planta_exterior("Gerani", "Pelargonium", "Esqueix", "Alt", "P");
 call insereix_planta_exterior("Begonia", "Begonia rex", "Esqueix", "Alt", "P");
-call insereix_planta_exterior("Begonia", "Begonia rex", "Capficats", "Alt", "T"); /* Els canvis en tipus no es tindran en compte, s'estan realitzant insercions no modificacions */
-call insereix_planta_exterior("Begonia", "Begonia rex", "Llavors", "Baix", "P");
+-- call insereix_planta_exterior("Begonia", "Begonia rex", "Capficats", "Alt", "T");
+-- call insereix_planta_exterior("Begonia", "Begonia rex", "Llavors", "Baix", "P");
+call vincula_o_insereix_reproduccio("Capficats", "Begonia", "Alt");
+call vincula_o_insereix_reproduccio("Llavors", "Begonia", "Baix");
 call insereix_planta_exterior("Camelia", "Camellia", "Estaques", "Alt", "P");
 call insereix_planta_exterior("Ciclamen", "Cyclamen", "Esqueix", "Alt", "P");
-call insereix_planta_exterior("Ciclamen", "Capficats", "Alt", "Alt", "P");
+-- call insereix_planta_exterior("Ciclamen", "Capficats", "Alt", "Alt", "P");
+call vincula_o_insereix_reproduccio("Capficats", "Ciclamen", "Alt");
 call insereix_planta_exterior("Roser", "Rosa", "Estaques", "Mitjà", "P");
 call insereix_planta_exterior("Falguera", "Polystichum", "Esqueix", "Mitjà", "P");
 call insereix_planta_exterior("Tulipa", "Tulipa", "Bulbs", "Alt", "T");
 call insereix_planta_exterior("Crisantem", "Chrysanthemum", "Bulbs", "Alt", NULL); /* Informació no proporcionada */ /*CANVIAR PER NULL SI QUEDA TEMPS */
 call insereix_planta_exterior("Cintes", "Chlorophytum", "Estolons", "Alt", "P");
 call insereix_planta_exterior("Heura", "Hedera", "Esqueix", "Alt", "P");
-call insereix_planta_exterior("Heura", "Hedera", "Capficats", "Alt", "P");
+-- call insereix_planta_exterior("Heura", "Hedera", "Capficats", "Alt", "P");
+call vincula_o_insereix_reproduccio("Capficats", "Heura", "Alt");
 
 -- Exemplars plantes: ESTAN PENSADES PER REALITZAR-SE AMB EL PROCEDIMENT insereix_exemplar.
 call insereix_exemplar("Gerani", 6); 
