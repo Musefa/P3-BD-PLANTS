@@ -455,7 +455,10 @@ CREATE TRIGGER planta_interior_update
 BEFORE UPDATE ON plantes_interior 
 FOR EACH ROW
 BEGIN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "Per realitzar actualitzacions cal actualitzar plantes.";
+    IF OLD.nom_planta <> NEW.nom_planta
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "Per realitzar actualitzacions sobre claus primaries cal actualitzar plantes."; /* Es restringeix la modificació */
+    END IF;
 END
 //
 
@@ -475,7 +478,10 @@ CREATE TRIGGER planta_exterior_update
 BEFORE UPDATE ON plantes_exterior
 FOR EACH ROW
 BEGIN
-    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "Per realitzar actualitzacions cal actualitzar plantes.";
+    IF OLD.nom_planta <> NEW.nom_planta
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "Per realitzar actualitzacions sobre claus primaries cal actualitzar plantes."; /* Es restringeix la modificació */
+    END IF;
 END
 //
 
