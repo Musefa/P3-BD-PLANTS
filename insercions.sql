@@ -9,10 +9,10 @@
 -- insert into metodes_reproduccio(nom) values ("Estolons");
 
 -- Estacions
-insert into estacions(nom) values ("Primavera");
-insert into estacions(nom) values ("Estiu");
-insert into estacions(nom) values ("Tardor");
-insert into estacions(nom) values ("Hivern");
+-- insert into estacions(nom) values ("Primavera");
+-- insert into estacions(nom) values ("Estiu");
+-- insert into estacions(nom) values ("Tardor");
+-- insert into estacions(nom) values ("Hivern");
 
 -- -- Plantes d'interior
 -- insert into plantes_interior(nom_planta, ubicacio_adient, temperatura_adient) values ("Potus", "Llum directa", 15.0);
