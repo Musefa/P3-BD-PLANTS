@@ -246,6 +246,8 @@ BEGIN
                    WHERE P.nom_popular = nom_popu_planta)
     THEN
         insert into plantes(nom_popular, nom_llati) values (nom_popu_planta, nom_llati_planta); /* Insertem si la planta no existeix en la BD encara */
+    ELSE
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "La planta ja existeix.";
     END IF;
 
     IF NOT EXISTS (SELECT *
@@ -340,43 +342,59 @@ CREATE PROCEDURE insereix_planta_interior
     /* Com a mínim la planta ha d'estar associada a un país, que es demana en aquesta funció d'inserció */
     /* Per inserir nous origens de paísos, cal afegir-los amb un insert into */
 BEGIN
-    call insereix_planta(nom_popu_planta, nom_llati_planta, nom_metode_reproduccio, grau_exit_intr); /* En cas que la planta ja existeixi la restricció de primary key ja anularà l'execució com s'esperaria */
+
     IF NOT EXISTS (SELECT *
-                   FROM paisos
-                   WHERE nom = primer_pais_obligatori)
+                FROM paisos
+                WHERE nom = primer_pais_obligatori)
     THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "El pais al qual es vol assignar la planta no existeix en la base de dades. Inserta'l primer.";
     END IF;
 
+    call insereix_planta(nom_popu_planta, nom_llati_planta, nom_metode_reproduccio, grau_exit_intr); /* En cas que la planta ja existeixi la restricció de primary key ja anularà l'execució com s'esperaria */
+
     IF NOT EXISTS (SELECT *
-                   FROM plantes_interior P
-                   WHERE P.nom_planta = nom_popu_planta)
+                FROM plantes_interior P
+                WHERE P.nom_planta = nom_popu_planta)
     THEN
         insert into plantes_interior(nom_planta, ubicacio_adient, temperatura_adient) values (nom_popu_planta, ubicacio, temp); /* Insertem si la planta d'interior no existeix en la BD encara */
+    ELSE
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "La planta d'interior ja existeix";
     END IF;
 
     IF NOT EXISTS (SELECT *
-                   FROM estacions MR
-                   WHERE MR.nom = nom_estacio_rec)
+                FROM estacions MR
+                WHERE MR.nom = nom_estacio_rec)
     THEN
         insert into estacions(nom) values (nom_estacio_rec); /* Insertem si l'estació no existeix en la BD encara */
     END IF;
 
     IF NOT EXISTS (SELECT *
-                   FROM rec_plantes
-                   WHERE (nom_planta_interior, nom_estacio) = (nom_popu_planta, nom_estacio_rec))
+                FROM rec_plantes
+                WHERE (nom_planta_interior, nom_estacio) = (nom_popu_planta, nom_estacio_rec))
     THEN
         insert into rec_plantes(nom_planta_interior, nom_estacio, quantitat_aigua) values (nom_popu_planta, nom_estacio_rec, qtat_aigua); /* Si introdueix erròniament informació repetida, no es té en compte */
     END IF; 
 
     IF NOT EXISTS (SELECT *
-                   FROM origen_plantes
-                   WHERE (nom_planta_interior, nom_pais) = (nom_popu_planta, primer_pais_obligatori))
+                FROM origen_plantes
+                WHERE (nom_planta_interior, nom_pais) = (nom_popu_planta, primer_pais_obligatori))
     THEN
         insert into origen_plantes(nom_planta_interior, nom_pais) values (nom_popu_planta, primer_pais_obligatori);
     END IF;
 END
 //
+
+CREATE PROCEDURE insereix_o_vincula_estacio (IN nom_estacio_intr type of estacions.nom, IN nom_planta_interior_intr type of plantes_interior.nom_planta, IN qtat_aigua type of rec_plantes.quantitat_aigua)
+BEGIN
+    IF NOT EXISTS (SELECT *
+                   FROM estacions
+                   WHERE nom = nom_estacio_intr)
+    THEN
+        insert into estacions(nom) values (nom_estacio_intr);
+    END IF;
+    insert into rec_plantes(nom_planta_interior, nom_estacio, quantitat_aigua) values (nom_planta_interior_intr, nom_estacio_intr, qtat_aigua);
+END 
+//  
 
 CREATE TRIGGER update_rec_plantes_restrict
 AFTER UPDATE ON rec_plantes
@@ -514,4 +532,28 @@ BEGIN
 END
 //
 
+CREATE PROCEDURE vincula_o_insereix_reproduccio(IN nom_repro type of reproduccions.nom_metode, IN nom_planta type of plantes.nom_popular, IN grau_exit_intr type of reproduccions.grau_exit)
+BEGIN
+    IF NOT EXISTS (SELECT *
+                   FROM metodes_reproduccio MR
+                   WHERE MR.nom = nom_repro)
+    THEN
+        insert into metodes_reproduccio(nom) values (nom_repro);
+    END IF;
+    insert into reproduccions(nom_planta, nom_metode, grau_exit) values (nom_planta, nom_repro, grau_exit_intr);
+END
+//
+
+CREATE PROCEDURE vincula_o_insereix_origen_plantes 
+    (IN nom_planta type of origen_plantes.nom_planta_interior, IN nom_pais type of origen_plantes.nom_pais)
+BEGIN
+    IF NOT EXISTS (SELECT *
+                   FROM paisos P
+                   WHERE p.nom = nom_pais)
+    THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "El pais al qual es vol assignar l'origen no existeix a la base de dades. Inserta'l primer.";
+    END IF;
+    insert into origen_plantes(nom_planta_interior, nom_pais) values (nom_planta, nom_pais);
+END
+//
 DELIMITER ;
