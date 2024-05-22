@@ -508,7 +508,7 @@ BEGIN
                WHERE nom_popular NOT IN (SELECT nom_planta
                                          FROM reproduccions))
     THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot borra el metode ja que si no quedara alguna planta sense cap reproduccio associada.";
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot esborrar el metode ja que si no quedara alguna planta sense cap reproduccio associada.";
     END IF;
 END
 //
@@ -533,7 +533,7 @@ FOR EACH ROW
 BEGIN
     IF EXISTS (SELECT *
                FROM plantes_interior
-               WHERE nom_planta NOT IN (SELECT nom_planta
+               WHERE nom_planta NOT IN (SELECT nom_planta_interior
                                         FROM origen_plantes))
     THEN 
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "No es pot esborrar el pais ja que si no quedaria alguna planta d'interior sense cap pais associat.";
