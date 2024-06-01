@@ -124,7 +124,7 @@ CREATE VIEW plantes_exterior_metodes AS
     SELECT P.nom_popular, P.nom_llati, COUNT(EP.numero)
     FROM plantes P
         LEFT OUTER JOIN exemplars_plantes EP ON (P.nom_popular = EP.nom_planta)
-    WHERE P.nom_popular in (SELECT PE.nom_planta
+    WHERE P.nom_popular IN (SELECT PE.nom_planta
                             FROM plantes_exterior PE)
     AND P.nom_popular IN (SELECT R.nom_planta
                           FROM reproduccions R
