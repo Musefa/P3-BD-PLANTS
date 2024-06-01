@@ -1,9 +1,9 @@
--- BORRADO Y CREACION DE LA BASE DE DATOS
-DROP SCHEMA IF EXISTS PLANTS;
+-- Creació i esborrat de les plantes.
+-- DROP SCHEMA IF EXISTS PLANTS; /* Descomentar per poder fer l'esborrat automàticament */
 CREATE SCHEMA PLANTS;
 USE PLANTS;
 
--- DEFINICION DE TABLAS DE LA BASE DE DATOS
+-- DEFINICIÓ DE TAULES DE LA BASE DE DADES
 CREATE TABLE firmes_comercials
 (
     nom CHAR(50),
@@ -140,12 +140,12 @@ CREATE VIEW temperatura_plantes_interior AS
 WITH CHECK OPTION
 //
 
-/* FUNCIONS + CONTROLS */
+/* DCL: FUNCIONS + CONTROLS */
 CREATE PROCEDURE insereix_exemplar(IN nom_plant type of plantes.nom_popular, IN num_exemplars type of exemplars_plantes.numero)
 BEGIN
     DECLARE last_exemplar TYPE OF exemplars_plantes.numero;
 
-    SELECT min(numero) /* Obtenim els exemplars que no tenen nombre consecutiu assignat i escollim el mínim (si tots tenen consecutiu, s'escull l'últim). */
+    SELECT min(numero) /* Obtenim els exemplars que no tenen nombre consecutiu assignat i escollim el mínim (si tots tenen consecutiu, s'escull l'últim) */
     INTO last_exemplar
     FROM exemplars_plantes
     WHERE nom_planta = nom_plant
@@ -202,42 +202,6 @@ BEGIN
     END IF;
 END
 //
-
-/* INSERTAR EN DOCU */
--- CREATE TRIGGER plantes_to_reproduccions
--- AFTER INSERT ON plantes
--- FOR EACH ROW
--- BEGIN
---     IF NOT EXISTS (SELECT *
---                    FROM reproduccions R
---                    WHERE R.nom_planta = new.nom_popular)
---     THEN
---         insert into reproduccions(nom_planta, nom_metode, grau_exit) values (new.nom_popular, DEFAULT, DEFAULT); /* Inserció brossa, per complir obligatorietat */
---     END IF;
--- END
--- //
-
--- CREATE TRIGGER metodes_to_reproduccions
--- AFTER INSERT ON metodes_reproduccio
--- FOR EACH ROW
--- BEGIN
---     IF NOT EXISTS (SELECT *
---                    FROM reproduccions R
---                    WHERE R.nom_metode = new.nom)
---     THEN
---         insert into reproduccions(nom_planta, nom_metode, grau_exit) values (DEFAULT, nom, DEFAULT); /* Inserció brossa, per complir obligatorietat */
---     END IF;
--- END
--- //
-
--- CREATE TRIGGER reproduccions /* Permet controlar que no s'emmagatzemin tuples brossa per complir obligatorietats */
--- BEFORE INSERT ON reproduccions
--- FOR EACH ROW
--- BEGIN
---     delete from reproduccions R where (R.nom_metode = DEFAULT(R.nom_metode) AND R.nom_planta = new.nom_planta) 
---     OR (R.nom_metode = new.nom_metode AND R.nom_planta = DEFAULT(R.nom_planta)); /* Esborrem tuples brossa dels valors inserits (si existeixen) */
--- END
--- //
 
 CREATE PROCEDURE insereix_planta(IN nom_popu_planta type of plantes.nom_popular, IN nom_llati_planta type of plantes.nom_llati, IN nom_metode_reproduccio type of metodes_reproduccio.nom, IN grau_exit_intr type of reproduccions.grau_exit)
 BEGIN
